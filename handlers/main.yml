@@ -1,2 +1,8 @@
 ---
 # handlers file for role_app_teamspeak/
+
+
+- name: Restart Teamspeak
+  ansible.builtin.service:
+    name: teamspeak
+    state: restarted

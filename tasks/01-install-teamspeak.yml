@@ -1,0 +1,52 @@
+
+- name: Add group teamspeak.
+  group:
+    name: teamspeak
+    state: present
+
+- name: Add user teamspeak.
+  user:
+    name: teamspeak
+    shell: /bin/bash
+    home: /opt/teamspeak
+    group: teamspeak
+
+- name: Create directory for Teamspeak setup.
+  unarchive:
+    src: teamspeak3-server_linux_amd64-3.13.7.tar.bz2
+    dest: /opt/teamspeak/
+  notify: "Restart Teamspeak"
+
+- name: Change ownership to Teamspeak user
+  file:
+    path: /opt/teamspeak/teamspeak3-server_linux_amd64/
+    owner: teamspeak
+    group: teamspeak
+    recurse: yes
+
+- name: Accept license
+  copy:
+    content: ""
+    dest: /opt/teamspeak/teamspeak3-server_linux_amd64/.ts3server_license_accepted
+    force: no
+    group: teamspeak
+    owner: teamspeak
+
+- name: Prepare systemd unit file
+  copy:
+    src: teamspeak.service
+    dest: /etc/systemd/system/teamspeak.service
+    owner: root
+    group: root
+    mode: '644'
+  notify: "Restart Teamspeak"
+
+- name: Activate new systemd file
+  systemd:
+    daemon_reload: yes
+
+- name: Start and enable teamspeak service
+  service:
+    name: teamspeak
+    state: started
+    enabled: yes
